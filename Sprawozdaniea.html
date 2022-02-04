@@ -1,0 +1,432 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/default.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markdown-it-texmath/css/texmath.min.css">
+<link rel="stylesheet" href="file:///c:\Users\mikol\.vscode\extensions\goessner.mdmath-2.7.4\themes\default\style.css">
+
+</head>
+<body class="markdown-body">
+<h1 id="sprawozdanie-z-projektu-zaliczeniowego-systemc3b3w-wbudowanych">Sprawozdanie z projektu zaliczeniowego Systemów Wbudowanych</h1>
+<p>Autorzy: Mikołaj Walkowski 145399, Bartosz Chazan 145338</p>
+<h2 id="cel-projektu">Cel projektu</h2>
+<p>Stworzenie sieci do zarządzania klientami opartymi na płytce esp-12e z różnymi zasobami za pomocą centralnego serwera opartego na raspberry Pi 4b.<br>
+Sieć ta ma na celu umożliwienie:</p>
+<ul>
+<li>zbierania danych z sensorów klientów</li>
+<li>sterowania klientami poprzez system prostych reguł</li>
+<li>przeglądu danych za pomocą strony http w lokalnej sieci. #FIXME</li>
+<li>tworzenia i zarządzania regułami przez stronę http.</li>
+<li>Zapisywanie danych o uruchomieniu urządzeń, odczycie sensorów jak i reguł w bazie danych.</li>
+</ul>
+<h3 id="implementacja">Implementacja</h3>
+<h4 id="reguc582y">Reguły</h4>
+<p>Jako wzór prostej reguły w projekcie przyjęto:<br>
+Jeżeli ostatni odczyt (x) urządzenia A spełnia <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>c</mi><mi>o</mi><mi>n</mi><mi>s</mi><mi>t</mi><mi mathvariant="normal">.</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f(x,const.)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">c</span><span class="mord mathdefault">o</span><span class="mord mathdefault">n</span><span class="mord mathdefault">s</span><span class="mord mathdefault">t</span><span class="mord">.</span><span class="mclose">)</span></span></span></span>, to ustaw stan urządzenia B na y, gdzie <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo><mo>∈</mo><mo stretchy="false">{</mo><mi>a</mi><mo>=</mo><mi>b</mi><mo separator="true">;</mo><mi>a</mi><mo>≤</mo><mi>b</mi><mo separator="true">;</mo><mi>a</mi><mo>≥</mo><mi>b</mi><mo separator="true">;</mo><mi>a</mi><mo>&lt;</mo><mi>b</mi><mo separator="true">;</mo><mi>a</mi><mo>&gt;</mo><mi>b</mi><mo separator="true">;</mo><mi>a</mi><mo mathvariant="normal">≠</mo><mi>b</mi><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">f(a,b) \in \{ a=b;a\leq b;a\geq b;a &lt; b ;a &gt; b;a \neq b \}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">a</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">b</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">{</span><span class="mord mathdefault">a</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">b</span><span class="mpunct">;</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">a</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">b</span><span class="mpunct">;</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">a</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">b</span><span class="mpunct">;</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">a</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">b</span><span class="mpunct">;</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">a</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">b</span><span class="mpunct">;</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">a</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel"><span class="mrel"><span class="mord"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="rlap"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="inner"><span class="mrel"></span></span><span class="fix"></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.19444em;"><span></span></span></span></span></span></span><span class="mrel">=</span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">b</span><span class="mclose">}</span></span></span></span></p>
+<h4 id="protokc3b3c582-komunikacji">Protokół komunikacji</h4>
+<ul>
+<li>Opis urządzenia<pre><code><code><div>[k] identifier %json
+</div></code></code></pre>
+przykładowy JSON<pre><code class="code-line language-json"><div>    {mac: <span class="hljs-string">&quot;AA:AA:AA:AA:AA&quot;</span>,
+        devices: [
+            {
+            name: <span class="hljs-string">&quot;sonar&quot;</span>,
+            type: <span class="hljs-string">&quot;passive&quot;</span>,
+            units: <span class="hljs-string">&quot;cm&quot;</span> 
+            },
+            {name: <span class="hljs-string">&quot;motorR&quot;</span>,
+            type: <span class="hljs-string">&quot;active&quot;</span>,
+            units: <span class="hljs-literal">null</span>
+            },
+            {name: <span class="hljs-string">&quot;motorL&quot;</span>,
+            type: <span class="hljs-string">&quot;active&quot;</span>,
+            units:<span class="hljs-literal">null</span>
+            }]
+    }
+</div></code></pre>
+</li>
+<li>Zmienienie stanu urządzenia<pre><code><code><div>[s] %nazwa %bool
+</div></code></code></pre>
+</li>
+<li>Odczyt sensora<pre><code><code><div>[k] %nazwa %number
+</div></code></code></pre>
+</li>
+<li>Sygnał puls klienta<pre><code><code><div>[k] _alive
+</div></code></code></pre>
+</li>
+</ul>
+<h4 id="server">Server</h4>
+<ul>
+<li>baza danych
+<ul>
+<li>
+<pre><code class="code-line language-javascript"><div>    (<span class="hljs-keyword">async</span> () =&gt; {
+    db = <span class="hljs-keyword">await</span> open({
+        <span class="hljs-attr">filename</span>: <span class="hljs-string">&#x27;./db/sensors.db&#x27;</span>,
+        <span class="hljs-attr">driver</span>: sqlite3.Database
+    })
+    <span class="hljs-comment">//await db.exec(&#x27;DROP TABLE devices&#x27;);await db.exec(&#x27;DROP TABLE devReadout&#x27;);await db.exec(&#x27;DROP TABLE rules&#x27;);</span>
+    <span class="hljs-comment">//db.exec(&#x27;DROP TABLE devReadout&#x27;);</span>
+    <span class="hljs-keyword">await</span> db.exec(<span class="hljs-string">&#x27;CREATE TABLE IF NOT EXISTS devices (espId, devName, devType, devUnits, CONSTRAINT pkDevices PRIMARY KEY(espId ,devName) ON CONFLICT IGNORE)&#x27;</span>);
+    <span class="hljs-keyword">await</span> db.exec(<span class="hljs-string">&#x27;CREATE TABLE IF NOT EXISTS devReadout (espId ,devName, readOut REAL, date datetime DEFAULT current_timestamp, CONSTRAINT fkDevR__Dev FOREIGN KEY(espId, devName) REFERENCES devices(espId, devName) ON DELETE CASCADE )&#x27;</span>);
+    <span class="hljs-keyword">await</span> db.exec(<span class="hljs-string">&#x27;CREATE TABLE IF NOT EXISTS rules (ruleName, ruleTargetId, ruleTargetName, ruleSourceId, ruleSourceName, ruleFunction, val REAL,result NUMBER, CONSTRAINT pkRules PRIMARY KEY(ruleName) ON CONFLICT IGNORE,  CONSTRAINT fkDevRT_Dev FOREIGN KEY(ruleSourceId, ruleSourceName) REFERENCES devices(espId, devName) ON DELETE CASCADE,  CONSTRAINT fkDevRS_Dev FOREIGN KEY(ruleTargetId, ruleTargetName) REFERENCES devices(espId, devName) ON DELETE CASCADE)&#x27;</span>);
+})()
+</div></code></pre>
+</li>
+<li>Baza danych składa się z trzech tabel:
+<ol>
+<li>devices - zawiera pary urządzenie i adres mac każdego obsługiwanego klienta, a także dodatkowe informacje o każdym urządzeniu.</li>
+<li>devRedout - zawiera klucz główny tabeli devices, odczyt i godzinę zapisania.</li>
+<li>rules - zawiera zdefiniowane przez użytkownika reguły.</li>
+</ol>
+</li>
+<li>Do przechowywania danych wykorzystano interface SQLite3.</li>
+</ul>
+</li>
+<li>komunikacja z serwerem
+<ol>
+<li>Po nawiązaniu połączenia klient wysyła swój opis.</li>
+<li>Klient wysyła co określony interwał/zmianę odczyty ze swoich sensorów. #FIXME</li>
+<li>Serwer po otrzymaniu wiadomości zapisuje odczyt do bazy danych.</li>
+<li>Serwer sprawdza czy w bazie danych istnieją reguły bazujące na odczycie z danego sensora.
+<ol>
+<li>Jeżeli istnieją to do każdego urządzenia będącego celem reguł zostaje wysłana wiadomość z poleceniem zmiany stanu na zgody z daną regułą.</li>
+<li>Zostaje zapisana także zmiana stanu urządzenia do bazy danych. #FIXME</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>Strona http
+Serwer http został napisany przy użyciu ExpressJS, ExpressHandlebars.
+Przy pisaniu strony wykorzystano ChartJS, Bootstrap, chartjs-adapter-date-fns.
+#TODO Screeny strony</li>
+<li>Serwer został postawiony na raspberryPi 4b. #FIXME</li>
+</ul>
+<h4 id="klient">Klient</h4>
+<ul>
+<li>kod klienta<pre><code class="code-line language-arduino"><div>    <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;ESP8266WiFi.h&gt;</span></span>
+    <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;Arduino.h&gt;</span></span>
+    <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;DallasTemperature.h&gt;</span></span>
+    <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;OneWire.h&gt;</span></span>
+
+    <span class="hljs-meta">#<span class="hljs-meta-keyword">ifndef</span> STASSID</span>
+    <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> STASSID <span class="hljs-meta-string">&quot;OGMv2&quot;</span></span>
+    <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> STAPSK  <span class="hljs-meta-string">&quot;amenoera&quot;</span></span>
+    <span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+    <span class="hljs-comment">// inicjalizacja </span>
+    <span class="hljs-comment">//first dev</span>
+    <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SENSORS_SIZE 1</span>
+    <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> ACTIVE_SIZE 2</span>
+    <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> TOGGLES_SIZE 0</span>
+    <span class="hljs-keyword">String</span> introductionJson = <span class="hljs-string">&quot;identifier {\&quot;mac\&quot;:\&quot;&quot;</span>+ <span class="hljs-keyword">String</span>(<span class="hljs-built_in">WiFi</span>.<span class="hljs-built_in">macAddress</span>()) +<span class="hljs-string">&quot;\&quot;,\&quot;devices\&quot;:[{\&quot;name\&quot;:\&quot;sonar\&quot;,\&quot;type\&quot;:\&quot;passive\&quot;,\&quot;units\&quot;:\&quot;cm\&quot;},{\&quot;name\&quot;:\&quot;motorR\&quot;,\&quot;type\&quot;:\&quot;active\&quot;,\&quot;units\&quot;:null},{\&quot;name\&quot;:\&quot;motorL\&quot;,\&quot;type\&quot;:\&quot;active\&quot;,\&quot;units\&quot;:null}]}&quot;</span>;
+
+    <span class="hljs-comment">// //second dev</span>
+    <span class="hljs-comment">// #define SENSORS_SIZE 1</span>
+    <span class="hljs-comment">// #define ACTIVE_SIZE 2</span>
+    <span class="hljs-comment">// #define TOGGLES_SIZE 2</span>
+    <span class="hljs-comment">// OneWire oneWire(D2); </span>
+    <span class="hljs-comment">// DallasTemperature temp(&amp;oneWire);</span>
+    <span class="hljs-comment">// String introductionJson = &quot;identifier {\&quot;mac\&quot;:\&quot;&quot;+ String(WiFi.macAddress()) +&quot;\&quot;,\&quot;devices\&quot;:[{\&quot;name\&quot;:\&quot;temperatureSensor\&quot;,\&quot;type\&quot;:\&quot;passive\&quot;,\&quot;units\&quot;:\&quot;C\&quot;},{\&quot;name\&quot;:\&quot;buttonL\&quot;,\&quot;type\&quot;:\&quot;passive\&quot;,\&quot;units\&quot;:\&quot;pressed\&quot;},{\&quot;name\&quot;:\&quot;buttonR\&quot;,\&quot;type\&quot;:\&quot;passive\&quot;,\&quot;units\&quot;:\&quot;pressed\&quot;},{\&quot;name\&quot;:\&quot;LedRed\&quot;,\&quot;type\&quot;:\&quot;active\&quot;,\&quot;units\&quot;:null},{\&quot;name\&quot;:\&quot;LedGreen\&quot;,\&quot;type\&quot;:\&quot;active\&quot;,\&quot;units\&quot;:null}]}&quot;;</span>
+
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* ssid     = STASSID;
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* password = STAPSK;
+
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* host = <span class="hljs-string">&quot;ip addr&quot;</span>;
+    <span class="hljs-keyword">const</span> <span class="hljs-keyword">uint16_t</span> port = <span class="hljs-number">3000</span>;
+
+    <span class="hljs-built_in">WiFiClient</span> client;
+
+    <span class="hljs-keyword">char</span> buff[<span class="hljs-number">100</span>];
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">sensor</span>
+    {</span>
+    <span class="hljs-keyword">String</span> name;
+    <span class="hljs-keyword">float</span> (*func)();
+    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> last;
+    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> interval;
+    
+    };
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">toggle</span>
+    {</span>
+    <span class="hljs-keyword">String</span> name;
+    <span class="hljs-keyword">int</span> pin;  
+    <span class="hljs-keyword">int</span> state;
+    };
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">active</span>{</span>
+    <span class="hljs-keyword">String</span> name;
+    <span class="hljs-keyword">int</span> state;
+    <span class="hljs-keyword">int</span>* pins; 
+    <span class="hljs-keyword">void</span> (*func)(struct active*,<span class="hljs-keyword">int</span>);
+    };
+
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">sensor</span> <span class="hljs-title">sensors</span>[<span class="hljs-title">SENSORS_SIZE</span>];</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">active</span> <span class="hljs-title">actives</span>[<span class="hljs-title">ACTIVE_SIZE</span>];</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">toggle</span> <span class="hljs-title">toggles</span>[<span class="hljs-title">TOGGLES_SIZE</span>];</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">float</span> <span class="hljs-title">getReadOut</span><span class="hljs-params">(<span class="hljs-keyword">String</span> name)</span></span>{
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i =<span class="hljs-number">0</span>; i &lt; SENSORS_SIZE; ++i){
+        <span class="hljs-keyword">if</span>(name == sensors[i].name){
+        <span class="hljs-keyword">return</span> sensors[i].func();;
+        }
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">analyseMsg</span><span class="hljs-params">()</span></span>{
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i =<span class="hljs-number">0</span>; i &lt; ACTIVE_SIZE; ++i){
+        <span class="hljs-keyword">if</span>(<span class="hljs-keyword">String</span>(buff).startsWith(actives[i].name)){
+        <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">println</span>(actives[i].name);
+        <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">println</span>(*(buff+actives[i].name.length()+<span class="hljs-number">1</span>));
+        <span class="hljs-keyword">if</span> (*(buff+actives[i].name.length()+<span class="hljs-number">1</span>) == <span class="hljs-string">&#x27;0&#x27;</span>){
+            actives[i].func(actives+i,<span class="hljs-number">0</span>);
+        }<span class="hljs-keyword">else</span>{
+            actives[i].func(actives+i,<span class="hljs-number">1</span>);
+        }
+        <span class="hljs-keyword">return</span>;
+        }
+    }
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">connect</span><span class="hljs-params">()</span></span>{
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;(Re)Connecting\n&quot;</span>);
+    <span class="hljs-keyword">while</span> (!client.<span class="hljs-built_in">connect</span>(host, port)) {
+        <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;.&quot;</span>);
+        <span class="hljs-built_in">delay</span>(<span class="hljs-number">1000</span>);
+    }
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">println</span>(<span class="hljs-string">&quot;\nSuccess\n&quot;</span>);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">float</span> <span class="hljs-title">sonarfunc</span><span class="hljs-params">()</span></span>{
+    <span class="hljs-built_in">digitalWrite</span>(D6, <span class="hljs-literal">LOW</span>);
+    <span class="hljs-built_in">delayMicroseconds</span>(<span class="hljs-number">2</span>);
+    <span class="hljs-built_in">digitalWrite</span>(D6, <span class="hljs-literal">HIGH</span>);
+    <span class="hljs-built_in">delayMicroseconds</span>(<span class="hljs-number">10</span>);
+    <span class="hljs-built_in">digitalWrite</span>(D6, <span class="hljs-literal">LOW</span>);
+    <span class="hljs-keyword">return</span> (<span class="hljs-built_in">pulseIn</span>(D5,<span class="hljs-literal">HIGH</span>)*<span class="hljs-number">0.034</span>)/<span class="hljs-number">2</span>;
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">motorfunc</span><span class="hljs-params">(struct active *motor, <span class="hljs-keyword">int</span> state)</span></span>{
+    <span class="hljs-keyword">if</span>(motor-&gt;state != state){
+        <span class="hljs-keyword">if</span>(motor-&gt;state == <span class="hljs-number">0</span>){
+        <span class="hljs-built_in">digitalWrite</span>(motor-&gt;pins[<span class="hljs-number">0</span>],<span class="hljs-literal">HIGH</span>);
+        <span class="hljs-built_in">digitalWrite</span>(motor-&gt;pins[<span class="hljs-number">1</span>],<span class="hljs-literal">HIGH</span>);
+        <span class="hljs-built_in">digitalWrite</span>(motor-&gt;pins[<span class="hljs-number">2</span>],<span class="hljs-literal">LOW</span>);
+        motor-&gt;state = <span class="hljs-number">1</span>;
+        }<span class="hljs-keyword">else</span>{
+        <span class="hljs-built_in">digitalWrite</span>(motor-&gt;pins[<span class="hljs-number">0</span>],<span class="hljs-literal">HIGH</span>);
+        <span class="hljs-built_in">digitalWrite</span>(motor-&gt;pins[<span class="hljs-number">1</span>],<span class="hljs-literal">LOW</span>);
+        <span class="hljs-built_in">digitalWrite</span>(motor-&gt;pins[<span class="hljs-number">2</span>],<span class="hljs-literal">LOW</span>);
+        motor-&gt;state = <span class="hljs-number">0</span>;
+        }
+    }
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">ledfunc</span><span class="hljs-params">(struct active *led, <span class="hljs-keyword">int</span> state)</span></span>{
+    <span class="hljs-keyword">if</span>(led-&gt;state != state){
+        <span class="hljs-keyword">if</span>(led-&gt;state == <span class="hljs-number">0</span>){
+        <span class="hljs-built_in">digitalWrite</span>(*(led-&gt;pins),<span class="hljs-literal">HIGH</span>);
+        led-&gt;state = <span class="hljs-number">1</span>;
+        }<span class="hljs-keyword">else</span>{
+        <span class="hljs-built_in">digitalWrite</span>(*(led-&gt;pins),<span class="hljs-literal">LOW</span>);
+        led-&gt;state = <span class="hljs-number">0</span>;
+        }
+    }
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">initDev1</span><span class="hljs-params">()</span></span>{
+    sensors[<span class="hljs-number">0</span>].name = <span class="hljs-string">&quot;sonar&quot;</span>;
+    sensors[<span class="hljs-number">0</span>].last = <span class="hljs-built_in">millis</span>();
+    sensors[<span class="hljs-number">0</span>].interval = <span class="hljs-number">500U</span>L;
+    sensors[<span class="hljs-number">0</span>].func = sonarfunc;
+
+    <span class="hljs-built_in">pinMode</span>(D6,<span class="hljs-literal">OUTPUT</span>);<span class="hljs-comment">//trig</span>
+    <span class="hljs-built_in">pinMode</span>(D5,<span class="hljs-literal">INPUT</span>);<span class="hljs-comment">//echo</span>
+    <span class="hljs-built_in">digitalWrite</span>(D6,<span class="hljs-literal">LOW</span>);
+
+    actives[<span class="hljs-number">0</span>].name = <span class="hljs-string">&quot;motorR&quot;</span>;
+    actives[<span class="hljs-number">0</span>].state = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">int</span> * pins1 = <span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>[<span class="hljs-number">3</span>];
+    <span class="hljs-keyword">int</span> pin1[] ={D2,D0,D1};
+    <span class="hljs-built_in">memcpy</span>(pins1,pin1,<span class="hljs-keyword">sizeof</span>(pin1));
+    actives[<span class="hljs-number">0</span>].pins = pins1;
+    actives[<span class="hljs-number">0</span>].func = motorfunc;
+
+    <span class="hljs-built_in">pinMode</span>(D2,<span class="hljs-literal">OUTPUT</span>);
+    <span class="hljs-built_in">pinMode</span>(D0,<span class="hljs-literal">OUTPUT</span>);
+    <span class="hljs-built_in">pinMode</span>(D1,<span class="hljs-literal">OUTPUT</span>);
+
+    actives[<span class="hljs-number">0</span>].func(actives,<span class="hljs-number">0</span>);
+
+    actives[<span class="hljs-number">1</span>].name = <span class="hljs-string">&quot;motorL&quot;</span>;
+    actives[<span class="hljs-number">1</span>].state = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">int</span> * pins2 = <span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>[<span class="hljs-number">3</span>];
+    <span class="hljs-keyword">int</span> pin2[] = {D8,D3,D4};
+    <span class="hljs-built_in">memcpy</span>(pins2,pin2,<span class="hljs-keyword">sizeof</span>(pin2));
+    actives[<span class="hljs-number">1</span>].pins = pins2;
+    actives[<span class="hljs-number">1</span>].func = motorfunc;
+
+    <span class="hljs-built_in">pinMode</span>(D8,<span class="hljs-literal">OUTPUT</span>);
+    <span class="hljs-built_in">pinMode</span>(D3,<span class="hljs-literal">OUTPUT</span>);
+    <span class="hljs-built_in">pinMode</span>(D4,<span class="hljs-literal">OUTPUT</span>);
+
+    actives[<span class="hljs-number">1</span>].func(actives+<span class="hljs-number">1</span>,<span class="hljs-number">0</span>);
+    }
+
+    <span class="hljs-comment">// Sec Dev</span>
+    <span class="hljs-comment">// float tempfunc(){</span>
+    <span class="hljs-comment">//   temp.requestTemperatures();</span>
+    <span class="hljs-comment">//   return temp.getTempCByIndex(0);</span>
+    <span class="hljs-comment">// }</span>
+    <span class="hljs-comment">// void initDev2(){</span>
+    <span class="hljs-comment">//   sensors[0].name = &quot;temperatureSensor&quot;;</span>
+    <span class="hljs-comment">//   sensors[0].func = tempfunc;</span>
+    <span class="hljs-comment">//   sensors[0].last = millis();</span>
+    <span class="hljs-comment">//   sensors[0].interval = 5000UL;</span>
+
+    <span class="hljs-comment">//   pinMode(D1, INPUT);</span>
+    <span class="hljs-comment">//   toggles[0].name = &quot;buttonL&quot;;</span>
+    <span class="hljs-comment">//   toggles[0].state = 0;</span>
+    <span class="hljs-comment">//   toggles[0].pin = D1;</span>
+    <span class="hljs-comment">//   pinMode(D0, INPUT);</span>
+    <span class="hljs-comment">//   toggles[1].name = &quot;buttonR&quot;;</span>
+    <span class="hljs-comment">//   toggles[1].state = 0;</span>
+    <span class="hljs-comment">//   toggles[1].pin = D0;</span>
+
+    <span class="hljs-comment">//   pinMode(D5, OUTPUT); //TODO</span>
+    <span class="hljs-comment">//   actives[0].name = &quot;LedRed&quot;;</span>
+    <span class="hljs-comment">//   actives[0].state = 0;</span>
+    <span class="hljs-comment">//   int * pin = new int;</span>
+    <span class="hljs-comment">//   *pin = D5;//TODO</span>
+    <span class="hljs-comment">//   actives[0].pins = pin;</span>
+    <span class="hljs-comment">//   actives[0].func = ledfunc;</span>
+    <span class="hljs-comment">//   ledfunc(actives  , 0);</span>
+
+    <span class="hljs-comment">//   pinMode(D6, OUTPUT); //TODO</span>
+    <span class="hljs-comment">//   actives[1].name = &quot;LedGreen&quot;;</span>
+    <span class="hljs-comment">//   actives[1].state = 0;</span>
+    <span class="hljs-comment">//   int * pin2 = new int;</span>
+    <span class="hljs-comment">//   *pin2 = D6;//TODO</span>
+    <span class="hljs-comment">//   actives[1].pins = pin2;</span>
+    <span class="hljs-comment">//   actives[1].func = ledfunc;</span>
+    <span class="hljs-comment">//   ledfunc(actives +1 , 0);</span>
+    <span class="hljs-comment">//  }</span>
+
+    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> heartbeat, pulse = <span class="hljs-number">1500U</span>L;
+
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setup</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">begin</span>(<span class="hljs-number">115200</span>);
+
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">println</span>();
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">println</span>();
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Connecting to &quot;</span>);
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">println</span>(ssid);
+
+    <span class="hljs-built_in">WiFi</span>.mode(WIFI_STA);
+    <span class="hljs-built_in">WiFi</span>.<span class="hljs-built_in">begin</span>(ssid, password);
+
+    <span class="hljs-keyword">while</span> (<span class="hljs-built_in">WiFi</span>.status() != WL_CONNECTED) {
+        <span class="hljs-built_in">delay</span>(<span class="hljs-number">500</span>);
+        <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;.&quot;</span>);
+    }
+
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">println</span>(<span class="hljs-string">&quot;&quot;</span>);
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">println</span>(<span class="hljs-string">&quot;WiFi connected&quot;</span>);
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">println</span>(<span class="hljs-string">&quot;IP address: &quot;</span>);
+
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;connecting to &quot;</span>);
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">print</span>(host);
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;:&#x27;</span>);
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">println</span>(port);
+
+    <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">println</span>(<span class="hljs-built_in">WiFi</span>.<span class="hljs-built_in">localIP</span>());
+    <span class="hljs-built_in">connect</span>();
+    client.<span class="hljs-built_in">write</span>(introductionJson.c_str(),introductionJson.length()+<span class="hljs-number">1</span>);
+    heartbeat = <span class="hljs-built_in">millis</span>();
+    initDev1();
+    <span class="hljs-comment">// initDev2();</span>
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">loop</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">if</span>(!client.<span class="hljs-built_in">connected</span>()){
+        <span class="hljs-built_in">connect</span>();
+        client.<span class="hljs-built_in">write</span>(introductionJson.c_str(),introductionJson.length()+<span class="hljs-number">1</span>);
+        <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt;SENSORS_SIZE;++i){
+        sensors[i].last = <span class="hljs-built_in">millis</span>();
+        }
+    }
+    <span class="hljs-keyword">if</span>(client.<span class="hljs-built_in">available</span>()) {
+        <span class="hljs-built_in">memset</span>(buff,<span class="hljs-number">0</span>, <span class="hljs-keyword">sizeof</span>(buff));
+        <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i&lt; <span class="hljs-number">100</span>&amp;&amp;client.<span class="hljs-built_in">available</span>(); ++i) {
+        buff[i] = client.<span class="hljs-built_in">read</span>();
+        <span class="hljs-keyword">if</span>(buff[i] ==<span class="hljs-string">&#x27;\0&#x27;</span>) <span class="hljs-keyword">break</span>;
+        }
+        <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">print</span>(buff);
+        <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;\n&#x27;</span>);
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>;buff[i] != <span class="hljs-string">&#x27;\0&#x27;</span>; ++i)
+        {
+        <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">print</span>(buff[i],DEC);
+        <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27; &#x27;</span>);
+        }
+        <span class="hljs-built_in">Serial</span>.<span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;\n&#x27;</span>);
+        analyseMsg();
+    }
+    <span class="hljs-comment">//Checking if should send sensor update</span>
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i =<span class="hljs-number">0</span>; i &lt; SENSORS_SIZE ; ++i){
+        <span class="hljs-keyword">if</span>(sensors[i].last + sensors[i].interval &lt; <span class="hljs-built_in">millis</span>()){
+        <span class="hljs-keyword">float</span> readout = getReadOut(sensors[i].name);
+        <span class="hljs-keyword">String</span> msg = sensors[i].name + <span class="hljs-string">&quot; &quot;</span> +  <span class="hljs-keyword">String</span>(readout); 
+        <span class="hljs-keyword">if</span>(client.<span class="hljs-built_in">connected</span>()){
+            client.<span class="hljs-built_in">write</span>(msg.c_str(),msg.length()+<span class="hljs-number">1</span>);
+        }<span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span>;
+        sensors[i].last = <span class="hljs-built_in">millis</span>();
+        }
+    }
+    <span class="hljs-comment">//Checking if should send toggles update</span>
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i =<span class="hljs-number">0</span>; i &lt; TOGGLES_SIZE ; ++i){
+        <span class="hljs-keyword">int</span> curr = <span class="hljs-built_in">digitalRead</span>(toggles[i].pin);
+        <span class="hljs-keyword">if</span>(curr!=toggles[i].state){
+        toggles[i].state = curr;
+        <span class="hljs-keyword">String</span> msg = toggles[i].name + <span class="hljs-string">&quot; &quot;</span> +<span class="hljs-keyword">String</span>(curr);
+        <span class="hljs-keyword">if</span>(client.<span class="hljs-built_in">connected</span>()){
+            client.<span class="hljs-built_in">write</span>(msg.c_str(),msg.length()+<span class="hljs-number">1</span>);
+        }<span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span>;
+        sensors[i].last = <span class="hljs-built_in">millis</span>();
+        }
+    }
+    <span class="hljs-keyword">if</span>(heartbeat + pulse &lt; <span class="hljs-built_in">millis</span>()){
+        client.<span class="hljs-built_in">write</span>(<span class="hljs-string">&quot;_alive&quot;</span>,<span class="hljs-number">7</span>);
+        heartbeat = <span class="hljs-built_in">millis</span>();
+    }
+    }
+
+</div></code></pre>
+</li>
+<li>hardware
+<ul>
+<li>Klient &quot;pilot&quot;
+<ul>
+<li>Schemat<br>
+<img src="Pilot.png" alt="drawing" style="width:600px;"/></li>
+<li>Zdjęcie<br>
+#TODO Zdjęcia pilota</li>
+</ul>
+</li>
+<li>Klient &quot;robot&quot;
+<ul>
+<li>Schemat<br>
+<img src="Timmy.png" alt="drawing" style="width:600px;"/></li>
+<li>Zdjęcie<br>
+#TODO Zdjęcia robota</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</body>
+</html>
