@@ -1,0 +1,52 @@
+//const mongoose = require('mongoose')
+const net = require('net');
+
+//const url = 'mongodb://localhost:27017/test'
+
+//mongoose.connect(url)
+
+class Client{
+	socket;
+	obj;
+	constructor(socket){
+		this.socket = socket;
+	}
+}
+const server = net.createServer();
+let connectedClients = []
+
+server.listen({
+	port: 3000,
+});
+
+server.on('connection', (socket) => {
+	console.log('Client conected');
+	const client = new Client(socket)
+	connectedClients.push(client);
+	client.socket.write('identify\n');
+	client.socket.on('data', data => {
+		console.log('Client: ',client.socket.remoteAddress , 'Dane: ', data.toString(), '\n');
+		const ident =  data.toString().indexOf('identifier');
+		if(ident !==-1){
+			const json = data.toString().substr(11);
+			const obj = JSON.parse(json);
+			client.obj = obj;
+			console.table(connectedClients);
+			return;
+		}
+		console.log('was here\n')
+		client.obj.devices.forEach((dev)=>{
+			if(data.toString().indexOf(dev.name)==! -1 && dev.type === 'passive'){					console.log('Zapisz ',dev.name, ' do DB ',dane.toString().substr(data.toString().indexOf(dev.name)+1 ), '\n');
+					return;
+				}
+			});
+		}
+	})
+});
+setInterval(()=> {
+	connectedClients.forEach((client) => {
+		client.obj.devices.forEach((dev)=>{
+			client.socket.write(dev.name+'\n');
+		})
+	})
+}, 5000);

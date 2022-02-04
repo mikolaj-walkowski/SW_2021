@@ -1,0 +1,35 @@
+
+{{#if rule.ruleName}}
+<div class="ms-3" style="padding:0.2em">
+    <h2 class="text-center text-white fs-2">Delete Rule</h2>
+</div>
+<form action="/rules_delete?ruleName={{rule.ruleName}}" method='POST' class='mb-4'>
+    <div class="form-group">
+        <label for="ruleName">Rule name</label>
+        <input type="text" class="form-control" name="ruleName" placeholder="{{rule.ruleName}}" readonly>
+    </div>
+    <div class="form-group">
+        <label for="source" class="form-label">Source</label>
+        <input type="text" class="form-control" name="source" placeholder="{{rule.ruleSourceId}} {{rule.ruleSourceName}}" readonly>
+    </div>
+    <div class="form-group">
+        <label for="func" class="form-label">Operation</label>
+       	<input type="text" class="form-control" name="func" placeholder="{{rule.ruleFunction}}" readonly>
+
+    </div>
+    <div class="form-group">
+        <label for="value">Value</label>
+        <input type="text" class="form-control" name="value" placeholder="{{rule.val}}" readonly>
+    </div>
+    <div class="form-group">
+		<label for="target" class="form-label">Targets</label>
+        <input type="text" class="form-control" name="target" placeholder="{{rule.ruleTargetId}} {{rule.ruleTargetName}}" readonly>
+    </div>
+    <div class="form-group">
+		<label for="res" class="form-label">Result</label>
+        <input type="text" class="form-control" name="res" placeholder="{{rule.result}}" readonly>
+    </div>
+    <div class = "p-3"></div>
+    <input type="submit" value="Delete rule" class="btn btn-success btn-block">
+</form>
+{{/if}}

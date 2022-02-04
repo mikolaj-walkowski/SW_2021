@@ -1,0 +1,67 @@
+{{#if params}}
+<div style="padding:0.2em">
+    <p class="text-center text-white fs-2">{{this.params.espId}}_{{this.params.devName}}</p>
+</div>
+<div class="flex-grow-1 " style="padding:0.2em;">
+    <canvas id="myChart" </canvas>
+</div>
+<script>
+    const plugin = {
+        id: 'custom_canvas_background_color',
+        beforeDraw: (chart) => {
+            const ctx = chart.canvas.getContext('2d');
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-over';
+            ctx.fillStyle = 'AliceBlue';
+            ctx.fillRect(0, 0, chart.width, chart.height);
+            ctx.restore();
+        }
+    };
+    function BuildChart(arr) {
+        let chartStatus = Chart.getChart("myChart");
+        if (chartStatus != undefined) {
+            chartStatus.destroy();
+        }
+        const ctx = document.getElementById('myChart');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: ":{{this.params.espId}}" + " " + "{{this.params.devName}}",
+                    data: arr,
+                    borderColor: 'rgb(12, 182, 249)',
+                    stepped: true,
+                }]
+            },
+            plugins: [plugin],
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'minute',
+                        },
+                        distribution: 'linear',
+                    }
+                }
+            }
+        });
+
+    return myChart;
+    }
+
+    const xmlhttp = new XMLHttpRequest();
+    const url = "/chart_data?espId=" + "{{this.params.espId}}" + "&devName=" + "{{this.params.devName}}";
+
+    xmlhttp.onreadystatechange = () => {
+
+        let myArr = JSON.parse(xmlhttp.response);
+        BuildChart(myArr);
+
+    };
+
+    xmlhttp.open("GET", url, false);
+    xmlhttp.send();
+</script>
+
+{{/if}}

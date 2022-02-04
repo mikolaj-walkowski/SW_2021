@@ -1,0 +1,53 @@
+<div class="ms-3" style="padding:0.2em">
+    <h2 class="text-center text-white fs-2">Create Rule</h2>
+</div>
+<form action="/rules" method='POST' class='mb-4'>
+    <div class="form-group">
+        <label for="ruleName">Rule name</label>
+        <input type="text" class="form-control" name="ruleName">
+    </div>
+    <div class="form-group">
+        <label for="sourceDataList" class="form-label">Sources</label>
+        <input class="form-control" type="text" list="sourceDataOptions" id="sourceData" name="sourceData" placeholder="Type to search...">
+        <datalist id="sourceDataOptions">
+            {{#each sources}}
+            <option value="{{this.espId}} {{this.devName}}">
+                {{/each}}
+        </datalist>
+    </div>
+    <div class="form-group">
+        <label for="funcDataList" class="form-label">Operation</label>
+        <input class="form-control" type="text" list="funcDataOptions" id="funcData" name="funcData" placeholder="Type to search...">
+        <datalist id="funcDataOptions">
+            <option value="==">
+            <option value="!=">
+            <option value=">=">
+            <option value="<=">
+            <option value=">">
+            <option value="<">
+        </datalist>
+    </div>
+    <div class="form-group">
+        <label for="ruleBody">Value</label>
+        <input type="number" class="form-control" name="val">
+    </div>
+    <div class="form-group">
+        <label for="targetDataList" class="form-label">Targets</label>
+        <input class="form-control" type="text" list="targetDataOptions" id="targetData" name="targetData" placeholder="Type to search...">
+        <datalist id="targetDataOptions">
+            {{#each targets}}
+            <option value="{{this.espId}} {{this.devName}}">
+                {{/each}}
+        </datalist>
+    </div>
+    <div class="form-group">
+        <label for="resDataList" class="form-label">Result</label>
+        <input class="form-control" type="text" list="resDataOptions" id="resData" name="resData" placeholder="Type to search...">
+        <datalist id="resDataOptions">
+            <option value="On">
+            <option value="Off">
+        </datalist>
+    </div>
+    <div class = "p-3"></div>
+    <input type="submit" value="Add rule" class="btn btn-success btn-block">
+</form>
